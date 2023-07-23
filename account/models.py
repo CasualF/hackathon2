@@ -58,9 +58,22 @@ class CustomUser(AbstractUser):
         self.activation_code = code
 
 
+# class Contact(models.Model):
+#     contact1 = models.ForeignKey(CustomUser, related_name='my_contacts',on_delete=models.CASCADE)
+#     contact2 = models.ForeignKey(CustomUser, related_name='contacts', on_delete=models.CASCADE)
+#
+#     class Meta:
+#         unique_together = ['contact1', 'contact2']
+#
+#     def __str__(self):
+#         return f'{self.contact1.username} -> {self.contact2.usernafme}'
+
 class Contact(models.Model):
-    contact1 = models.ForeignKey(CustomUser, related_name='my_contacts', on_delete=models.CASCADE)
-    contact2 = models.ForeignKey(CustomUser, related_name='contacts', on_delete=models.CASCADE)
+    contact1 = models.ForeignKey(CustomUser, related_name='my_contacts',on_delete=models.CASCADE)
+    contact2 = models.ForeignKey(CustomUser, related_name='contact', on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ['contact1', 'contact2']
+
+    def __str__(self):
+        return f'{self.contact1.username} -> {self.contact2.username}'
