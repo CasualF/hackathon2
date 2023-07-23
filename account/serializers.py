@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Contact
-
+import json
 User = get_user_model()
 
 
@@ -47,20 +47,35 @@ class ActivationSerializer(serializers.Serializer):
             self.fail('Incorrect activation code')
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ('password', 'groups')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['contacts'] = instance.my_contacts.all()
-        contact = representation['contacts']
-        contact['contact_count'] = instance.my_contacts.count()
+        contacts = instance.my_contacts.all()
+        representation['contacts'] = [{'contact_id': i.contact2.id,
+                                       'contact_username': i.contact2.username} for i in contacts]
+        representation['contact_count'] = instance.my_contacts.count()
         return representation
 
 
+class UserSerializer(serializers.Serializer):
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+
 class ContactSerializer(serializers.ModelSerializer):
+    contact1_id = serializers.ReadOnlyField(source='contact1.id')
+    contact1 = serializers.ReadOnlyField(source='contact1.username')
+    contact2_username = serializers.ReadOnlyField(source='contact2.username')
+
     class Meta:
         model = Contact
         fields = '__all__'
+
+    def create(self, validated_data):
+        contact = Contact.objects.create(contact1=self.context['contact1'], **validated_data)
+        return contact
